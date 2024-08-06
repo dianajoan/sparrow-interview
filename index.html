@@ -42,7 +42,7 @@
     <div class="container">
       <h1>Welcome to Tech Corp</h1>
       <p>Your technology partner for innovative solutions</p>
-      <a href="#services" class="btn btn-primary">Our Services</a>
+      <a href="#services" class="btn btn-primary" id="scroll-btn">Our Services</a>
     </div>
   </section>
 
@@ -82,14 +82,16 @@
   <section id="contact" class="py-5 bg-light">
     <div class="container">
       <h2>Contact Us</h2>
-      <form>
+      <form id="contact-form">
         <div class="form-group">
           <label for="name">Name</label>
           <input type="text" class="form-control" id="name" placeholder="Your Name">
+          <div class="invalid-feedback">Name is required.</div>
         </div>
         <div class="form-group">
           <label for="email">Email address</label>
           <input type="email" class="form-control" id="email" placeholder="Your Email">
+          <div class="invalid-feedback">Valid email is required.</div>
         </div>
         <div class="form-group">
           <label for="message">Message</label>
@@ -104,5 +106,65 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Custom JS -->
+  <script>
+    // Smooth scrolling
+    document.getElementById('scroll-btn').addEventListener('click', function(event) {
+      event.preventDefault();
+      document.querySelector('#services').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Form validation
+    document.getElementById('contact-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      let isValid = true;
+
+      const nameField = document.getElementById('name');
+      const emailField = document.getElementById('email');
+      const messageField = document.getElementById('message');
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+      if (nameField.value.trim() === '') {
+        nameField.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        nameField.classList.remove('is-invalid');
+      }
+
+      if (!emailField.value.match(emailPattern)) {
+        emailField.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        emailField.classList.remove('is-invalid');
+      }
+
+      if (isValid) {
+        // Submit the form to the backend
+        fetch('process_contact.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({
+            name: nameField.value,
+            email: emailField.value,
+            message: messageField.value
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert('Form submitted successfully');
+            document.getElementById('contact-form').reset();
+          } else {
+            alert(data.message);
+          }
+        })
+        .catch(error => {
+          alert('Error submitting form');
+        });
+      }
+    });
+  </script>
 </body>
 </html>
